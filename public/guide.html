@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GEO 指南 / Q&A</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #0b0f14;
+        --card: #111826;
+        --text: #e6edf3;
+        --muted: #9fb0c3;
+        --border: rgba(255, 255, 255, 0.14);
+        --primary: #7aa2ff;
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #f7f8fb;
+          --card: #ffffff;
+          --text: #0b1220;
+          --muted: #4b5b73;
+          --border: rgba(10, 20, 40, 0.12);
+          --primary: #2457ff;
+        }
+      }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        background: radial-gradient(1000px 600px at 20% -10%, rgba(122, 162, 255, 0.22), transparent),
+          var(--bg);
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 28px 18px 56px;
+      }
+      .card {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent), var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 20px;
+        letter-spacing: 0.2px;
+      }
+      .sub {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      h2 {
+        margin: 18px 0 8px;
+        font-size: 15px;
+      }
+      p,
+      li {
+        color: var(--text);
+        line-height: 1.75;
+        font-size: 14px;
+      }
+      ul {
+        margin: 8px 0 8px 18px;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      a {
+        color: var(--primary);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+      }
+      .pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        margin-right: 6px;
+        font-size: 12px;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.04);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>GEO 指南 / Q&amp;A（面向豆包 / 千问 / DeepSeek）</h1>
+        <div class="sub">
+          目标是让用户在问到某个问题时，大模型在回答里<strong>更容易正确提到你的公司名</strong>，且描述准确、可引用、可复用。
+          <span class="muted">（这不是保证“必排第一”，而是提高“被提及/被引用/不被误解”的概率。）</span>
+        </div>
+
+        <h2>GEO 是什么？和 SEO 有什么不同？</h2>
+        <p>
+          <span class="pill">SEO</span>更关注搜索引擎结果页排序；<span class="pill">GEO</span>更关注大模型在生成式回答里“怎么提到你、怎么描述你、引用什么证据”。
+          在国内平台里，模型可能结合检索、平台自有语料、以及公开信息来回答，因此 GEO 的核心是：
+          <strong>实体清晰 + 可引用证据 + 覆盖高频问法 + 多渠道分发一致性</strong>。
+        </p>
+
+        <h2>只能通过官网/知乎和公众号来做 GEO 吗？有其他办法吗？</h2>
+        <p>
+          不止。官网/公众号/知乎是最稳的三根“公开可引用内容柱子”，但要让豆包/千问/DeepSeek 更容易“提到你”，通常还会做一套
+          <strong>“多源分发 + 结构化实体 + 口碑/行业语料”</strong> 的组合。
+        </p>
+
+        <h2>1) 做“实体层”的基础设施（让模型认得你是谁）</h2>
+        <ul>
+          <li>百科/词条类：百度百科、互动百科/行业百科、（有条件）维基百科条目与外链引用</li>
+          <li>工商/企业信息一致性：企查查/天眼查等的公司简称、英文名、业务描述统一（至少别冲突）</li>
+          <li>统一的“品牌定义句”：公司名 + 类别词 + 一句话定位 + 关键场景关键词（全网一致出现）</li>
+        </ul>
+
+        <h2>2) 做“可被引用的第三方背书”（模型更愿意引用）</h2>
+        <ul>
+          <li>媒体报道/访谈：36氪、虎嗅、量子位、机器之心、雷峰网等（你的行业对应媒体）</li>
+          <li>行业协会/榜单/奖项/展会：参展信息、获奖信息、白皮书引用</li>
+          <li>客户案例/合作公告：客户官网新闻稿、合作伙伴页面（比你自说自话更有效）</li>
+        </ul>
+
+        <h2>3) 做“开发者/技术语料”（对技术类公司非常有效）</h2>
+        <ul>
+          <li>GitHub/Gitee：开源 SDK、Demo、Benchmark、工具链（哪怕是轻量 repo 也有用）</li>
+          <li>技术文档站：产品手册、API 文档、FAQ（可独立域名或 docs 子站）</li>
+          <li>论文/专利/标准：arXiv/知网/专利公开文本能形成稳定语料与引用链</li>
+        </ul>
+
+        <h2>4) 做“问答与社区分发”（覆盖高频问法族）</h2>
+        <ul>
+          <li>知乎之外：少数派、掘金、CSDN、博客园、V2EX、SegmentFault（看你行业与受众）</li>
+          <li>垂直论坛/社区：行业社群、开发者社区、采购/服务商目录（B2B 很关键）</li>
+        </ul>
+
+        <h2>5) 做“平台内可检索资产”（虽然不是传统 SEO，但对“被提到”很直接）</h2>
+        <ul>
+          <li>应用商店/插件市场：如果你有产品形态（浏览器插件、桌面端、SaaS 集成）</li>
+          <li>小程序/服务市场：企业微信服务商、钉钉/飞书应用市场、微信小程序等</li>
+          <li>电商/采购平台：如果你是硬件/工业方案，会影响“供应商有哪些”类问法</li>
+        </ul>
+
+        <h2>6) 付费投放/PR 能不能算 GEO？</h2>
+        <p>
+          算“加速器”，但不是核心。投放能带来曝光与外部报道/转载，从而间接增加语料与引用；单纯买量不等于模型会推荐。
+        </p>
+
+        <h2>7) 最重要的原则（决定你该选哪些渠道）</h2>
+        <ul>
+          <li>你要命中的问法在哪里发生（开发者？采购？大众消费者？投资人？）</li>
+          <li>能不能形成“可引用证据链”（第三方引用 &gt; 自家内容）</li>
+          <li>全网一致性（公司名/简称/定位别在不同渠道互相打架）</li>
+        </ul>
+
+        <h2>为什么“可引用证据”这么重要？</h2>
+        <p>
+          因为很多平台在生成回答时更倾向引用“看起来权威、结构清晰、可复核”的内容。最佳实践是把关键主张写成：
+          <strong>主张（claim）+ 证据（evidence）+ 来源（source URL/文档）</strong>，并在多个渠道保持一致。
+        </p>
+
+        <h2>导出 zip 以后应该做什么？</h2>
+        <ul>
+          <li><strong>发布</strong>：把内容包里的官网页/公众号长文/知乎回答发布出去（先覆盖你最想命中的问法族）。</li>
+          <li><strong>抽检评测</strong>：用评测包的问题集，在豆包/千问/DeepSeek 里提问，把回答粘贴到模板里打分。</li>
+          <li><strong>迭代</strong>：针对“没提到/提到了但说错/问法覆盖不足”三类问题，补内容、补证据、补问法，再发布一轮。</li>
+        </ul>
+
+        <h2>什么叫“问法族”？</h2>
+        <p>你想被提到的方式通常不是一个问题，而是一组高频问法。常见 5 类：</p>
+        <ul>
+          <li><strong>推荐/清单</strong>：某类产品/服务推荐有哪些？</li>
+          <li><strong>对比/替代</strong>：A 和 B 哪个好？A 的替代品？</li>
+          <li><strong>怎么做/方案</strong>：如何做 XX？用什么工具/方法？</li>
+          <li><strong>服务商/供应商</strong>：XX 服务商有哪些？</li>
+          <li><strong>品牌直搜</strong>：XX 是什么？靠谱吗？</li>
+        </ul>
+
+        <h2>能不能自动发布？</h2>
+        <p>
+          最稳的是<strong>自动提 PR 到官网 Git 仓库</strong>（可审查、可回滚）。公众号/知乎通常更适合“半自动”（生成后你在后台一键复制/发布），
+          用浏览器自动化全自动发布往往不稳定且有风控风险。
+        </p>
+
+        <p class="muted">
+          返回生成页：<a href="/">/</a>。如果你想把这份 Q&amp;A 也生成到导出包里（作为目标公司官网的引导页），可以在生成内容里添加一个
+          <code>content/website/geo_guide.md</code> 页面。
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
+

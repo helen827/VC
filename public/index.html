@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GEO Agent Web</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #0b0f14;
+        --card: #111826;
+        --text: #e6edf3;
+        --muted: #9fb0c3;
+        --border: rgba(255, 255, 255, 0.14);
+        --primary: #7aa2ff;
+        --danger: #ff7a90;
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #f7f8fb;
+          --card: #ffffff;
+          --text: #0b1220;
+          --muted: #4b5b73;
+          --border: rgba(10, 20, 40, 0.12);
+          --primary: #2457ff;
+          --danger: #d81b48;
+        }
+      }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+          "Apple Color Emoji", "Segoe UI Emoji";
+        background: radial-gradient(1000px 600px at 20% -10%, rgba(122, 162, 255, 0.25), transparent),
+          radial-gradient(900px 600px at 90% 0%, rgba(255, 122, 144, 0.16), transparent),
+          var(--bg);
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 28px 18px 56px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+      .topLinks {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .topLinks a {
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 13px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .topLinks a:hover {
+        text-decoration: underline;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0;
+        letter-spacing: 0.2px;
+      }
+      .sub {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 6px;
+        line-height: 1.45;
+      }
+      .card {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent), var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+        margin: 10px 0 6px;
+      }
+      input[type="text"],
+      textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        outline: none;
+      }
+      textarea {
+        min-height: 110px;
+        resize: vertical;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 860px) {
+        .row {
+          grid-template-columns: 1fr;
+        }
+      }
+      .pastesHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 14px;
+      }
+      .btn {
+        appearance: none;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        padding: 9px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .btnPrimary {
+        border-color: rgba(122, 162, 255, 0.5);
+        background: rgba(122, 162, 255, 0.16);
+      }
+      .btnDanger {
+        border-color: rgba(255, 122, 144, 0.5);
+        background: rgba(255, 122, 144, 0.14);
+        color: var(--text);
+      }
+      .pasteItem {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        margin-top: 10px;
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .inline {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .inline input[type="checkbox"] {
+        transform: translateY(1px);
+      }
+      .status {
+        margin-top: 14px;
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+      .status strong {
+        color: var(--text);
+      }
+      .download a {
+        color: var(--primary);
+        text-decoration: none;
+      }
+      .download a:hover {
+        text-decoration: underline;
+      }
+      .sopBox {
+        margin-top: 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .sopHead {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      .sopPre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 13px;
+        line-height: 1.65;
+        color: var(--text);
+        margin: 0;
+      }
+      .fileList {
+        margin: 8px 0 0 16px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .contentBox {
+        margin-top: 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.03);
+      }
+      /* Docs-like layout */
+      .resultShell {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 14px;
+        margin-top: 12px;
+      }
+      @media (max-width: 980px) {
+        .resultShell {
+          grid-template-columns: 1fr;
+        }
+      }
+      .sidebar {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 10px;
+        position: sticky;
+        top: 14px;
+        height: fit-content;
+      }
+      .navTitle {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 6px 8px 10px;
+      }
+      .navGroup {
+        margin-top: 10px;
+      }
+      .navGroupHead {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--text);
+        font-weight: 700;
+        padding: 10px 8px 6px;
+      }
+      .stepBadge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 7px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        font-size: 12px;
+        font-weight: 700;
+        flex: 0 0 auto;
+      }
+      .navGroupTitle {
+        font-size: 13px;
+        color: var(--text);
+      }
+      .navItem {
+        display: block;
+        width: 100%;
+        text-align: left;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--text);
+        padding: 8px 8px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .navItem:hover {
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .navItemActive {
+        border-color: rgba(122, 162, 255, 0.45);
+        background: rgba(122, 162, 255, 0.12);
+      }
+      .navItemSub {
+        padding-left: 18px;
+        color: var(--muted);
+      }
+      .contentPane {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 16px;
+        min-height: 180px;
+      }
+      .contentHeader {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+      .contentTitle {
+        margin: 0;
+        font-size: 18px;
+        letter-spacing: 0.2px;
+      }
+      .contentMeta {
+        margin-top: 6px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .contentKicker {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      .contentActions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .doc {
+        font-size: 14px;
+        line-height: 1.8;
+        color: var(--text);
+      }
+      .doc h1,
+      .doc h2,
+      .doc h3 {
+        margin: 16px 0 8px;
+        line-height: 1.3;
+      }
+      .doc h1 {
+        font-size: 18px;
+        margin-top: 0;
+      }
+      .doc h2 {
+        font-size: 15px;
+        margin-top: 18px;
+      }
+      .doc h3 {
+        font-size: 14px;
+        margin-top: 14px;
+      }
+      .doc p {
+        margin: 8px 0;
+      }
+      .doc ul {
+        margin: 8px 0 8px 18px;
+      }
+      .doc ol {
+        margin: 8px 0 8px 22px;
+        padding-left: 18px;
+      }
+      .doc li {
+        margin: 6px 0;
+      }
+      .docBlock {
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        padding: 10px 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 13px;
+        line-height: 1.65;
+      }
+      footer {
+        margin-top: 18px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+      }
+
+      /* Access gate */
+      .gateOverlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        z-index: 50;
+        overflow: hidden;
+      }
+      .gateOverlay::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%201600%20900%27%3E%3Cdefs%3E%3CradialGradient%20id%3D%27g1%27%20cx%3D%2735%25%27%20cy%3D%2745%25%27%20r%3D%2760%25%27%3E%3Cstop%20offset%3D%270%25%27%20stop-color%3D%27%23ffb066%27%20stop-opacity%3D%270.95%27/%3E%3Cstop%20offset%3D%2765%25%27%20stop-color%3D%27%23ffb066%27%20stop-opacity%3D%270.0%27/%3E%3C/radialGradient%3E%3CradialGradient%20id%3D%27g2%27%20cx%3D%2770%25%27%20cy%3D%2735%25%27%20r%3D%2760%25%27%3E%3Cstop%20offset%3D%270%25%27%20stop-color%3D%27%23ff6aa0%27%20stop-opacity%3D%270.85%27/%3E%3Cstop%20offset%3D%2770%25%27%20stop-color%3D%27%23ff6aa0%27%20stop-opacity%3D%270.0%27/%3E%3C/radialGradient%3E%3CradialGradient%20id%3D%27g3%27%20cx%3D%2730%25%27%20cy%3D%2720%25%27%20r%3D%2760%25%27%3E%3Cstop%20offset%3D%270%25%27%20stop-color%3D%27%237aa2ff%27%20stop-opacity%3D%270.75%27/%3E%3Cstop%20offset%3D%2770%25%27%20stop-color%3D%27%237aa2ff%27%20stop-opacity%3D%270.0%27/%3E%3C/radialGradient%3E%3Cfilter%20id%3D%27blur%27%20x%3D%27-20%25%27%20y%3D%27-20%25%27%20width%3D%27140%25%27%20height%3D%27140%25%27%3E%3CfeGaussianBlur%20stdDeviation%3D%2780%27/%3E%3C/filter%3E%3C/defs%3E%3Crect%20width%3D%271600%27%20height%3D%27900%27%20fill%3D%27%23f7f8fb%27/%3E%3Cg%20filter%3D%27url(%23blur)%27%3E%3Crect%20x%3D%27-100%27%20y%3D%27-60%27%20width%3D%271100%27%20height%3D%271000%27%20fill%3D%27url(%23g1)%27/%3E%3Crect%20x%3D%27500%27%20y%3D%27-200%27%20width%3D%271200%27%20height%3D%271050%27%20fill%3D%27url(%23g2)%27/%3E%3Crect%20x%3D%27-250%27%20y%3D%27-280%27%20width%3D%271200%27%20height%3D%27900%27%20fill%3D%27url(%23g3)%27/%3E%3C/g%3E%3C/svg%3E");
+        background-size: cover;
+        background-position: center;
+        transform: scale(1.04);
+      }
+      .gateOverlay::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background: rgba(10, 16, 28, 0.18);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      .gateCard {
+        position: relative;
+        z-index: 1;
+        width: min(520px, 100%);
+        border-radius: 22px;
+        padding: 18px 18px;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.55);
+        box-shadow: 0 28px 90px rgba(0, 0, 0, 0.22);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        color: #0b1220;
+      }
+      .gateRow {
+        display: flex;
+        gap: 10px;
+        margin-top: 0;
+        align-items: center;
+      }
+      .gateRow input[type="password"] {
+        flex: 1 1 auto;
+      }
+      #gatePassword {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 11px 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(15, 23, 42, 0.14);
+        background: rgba(255, 255, 255, 0.75);
+        color: #0b1220;
+        outline: none;
+      }
+      #gatePassword::placeholder {
+        color: rgba(15, 23, 42, 0.42);
+      }
+      #gateSubmit {
+        border-radius: 14px;
+        border: 1px solid rgba(15, 23, 42, 0.14);
+        background: rgba(255, 255, 255, 0.75);
+        color: rgba(15, 23, 42, 0.92);
+        white-space: nowrap;
+        padding: 11px 14px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      }
+      #gateSubmit:hover {
+        background: rgba(255, 255, 255, 0.86);
+        border-color: rgba(15, 23, 42, 0.18);
+      }
+      #gateSubmit:active {
+        transform: translateY(0.5px);
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.07);
+      }
+      .gateError {
+        margin-top: 10px;
+        color: rgba(216, 27, 72, 0.92);
+        font-size: 13px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="gateOverlay" id="gateOverlay">
+      <div class="gateCard">
+        <div class="gateRow">
+          <input id="gatePassword" type="password" placeholder="访问密码" />
+          <button type="button" class="btn btnPrimary" id="gateSubmit">进入</button>
+        </div>
+        <div class="gateError" id="gateError">密码不正确，请重试。</div>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <header>
+        <div>
+          <h1>GEO Agent Web（本地生成 + 导出包）</h1>
+          <div class="sub">
+            面向豆包/千问/DeepSeek 等平台的“被提及/可引用性”优化：输入公司名与资料 → 生成内容包
+          </div>
+        </div>
+        <div class="topLinks">
+          <a href="/guide.html" target="_blank" rel="noopener noreferrer">GEO 指南 / Q&amp;A</a>
+        </div>
+      </header>
+
+      <div class="card">
+        <form id="form">
+          <label for="companyName">公司名（必填）</label>
+          <input id="companyName" name="companyName" type="text" placeholder="例如：MeetingPilot" required />
+
+          <div class="row">
+            <div>
+              <label for="urls">入口 URL（可选，多行；官网/公众号文章/知乎文章等）</label>
+              <textarea
+                id="urls"
+                name="urls"
+                placeholder="每行一个 URL，例如：https://example.com/about"
+              ></textarea>
+            </div>
+            <div>
+              <label for="docxFiles">上传 Word（.docx，可选，可多选）</label>
+              <input id="docxFiles" name="docxFiles" type="file" accept=".docx" multiple />
+              <div class="sub" style="margin-top: 8px">
+                仅提取文本用于生成与溯源，不会执行宏；若资料敏感建议只粘贴可公开部分。
+              </div>
+            </div>
+          </div>
+
+          <div class="pastesHeader">
+            <label style="margin: 0">手动补充材料（可选）</label>
+            <button type="button" class="btn" id="addPasteBtn">+ 添加一段</button>
+          </div>
+          <div id="pastes"></div>
+          <input type="hidden" id="pastedBlocksJson" name="pastedBlocksJson" value="[]" />
+
+          <div style="margin-top: 14px" class="inline">
+            <button type="submit" class="btn btnPrimary">生成发布 SOP（可选下载 zip）</button>
+            <button type="button" class="btn" id="resetBtn">重置</button>
+          </div>
+        </form>
+
+        <div class="status" id="status"></div>
+        <div class="status download" id="download"></div>
+        <div class="sopBox" id="sopBox" style="display: none">
+          <div class="sopHead">
+            <strong style="font-size: 13px">执行清单（SOP + 各平台发布文案）</strong>
+            <span class="sub" style="margin: 0">
+              <a href="#" id="zipLink">下载 zip（备份）</a>
+            </span>
+          </div>
+          <div class="sub" id="filesHint" style="margin-top: 0"></div>
+          <div class="resultShell">
+            <aside class="sidebar">
+              <div class="navTitle">导航</div>
+              <div id="nav"></div>
+            </aside>
+            <main class="contentPane">
+              <div class="contentHeader">
+                <div>
+                  <div class="contentKicker" id="docKicker"></div>
+                  <h2 class="contentTitle" id="docTitle">—</h2>
+                  <div class="contentMeta" id="docMeta"></div>
+                </div>
+                <div class="contentActions">
+                  <button type="button" class="btn" id="copyBtn">复制发布文案</button>
+                </div>
+              </div>
+              <div class="doc" id="docBody"></div>
+            </main>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        说明：生成后会优先展示“发布 SOP”（告诉你在官网/公众号/知乎分别发什么与发布顺序）；zip 仅用于备份与批量复制素材。当前版本默认使用 OpenAI 兼容的 Chat Completions 接口（配置见 <code>.env</code>）。评测包会生成一组问题，你可以把豆包/千问/DeepSeek 的回答粘贴回模板做人工抽检对比。
+      </footer>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
+
