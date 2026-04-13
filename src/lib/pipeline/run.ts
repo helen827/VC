@@ -4,7 +4,7 @@ import { z } from 'zod'
 import type { EntityProfile, EvalSuite, GeneratedFile, Source } from '../types.js'
 import type { LlmClient } from '../llm/openaiCompatible.js'
 import { fetchUrlAsText } from '../sources/fetchUrl.js'
-import { extractDocxText } from '../sources/docx.js'
+import { extractUploadText } from '../sources/extractUploadText.js'
 import { buildEntityProfile } from './buildProfile.js'
 import { generateGeoAssets } from './generateAssets.js'
 import { generateEvalSuite } from './generateEval.js'
@@ -24,7 +24,7 @@ export type GenerateInput = {
   companyName: string
   urls: string[]
   pastedBlocks: Array<{ title?: string; emphasized?: boolean; sourceUrl?: string; text?: string }>
-  docxFiles: Array<{ filename: string; buffer: Buffer }>
+  uploadFiles: Array<{ filename: string; buffer: Buffer }>
 }
 
 export type GenerateOutput = {
@@ -120,20 +120,28 @@ export async function runGeneratePipeline(input: {
   }
   if (pasted.length > 0) msg(`已加入手动材料：${pasted.length} 段。`)
 
-  const docx = input.payload.docxFiles.slice(0, 10)
-  if (docx.length > 0) msg(`解析 Word：${docx.length} 个…`)
-  for (const f of docx) {
-    const text = await extractDocxText(f.buffer)
-    if (!text.trim()) continue
-    const id = `S${nanoid(8)}`
-    sources.push({
-      id,
-      type: 'docx',
-      filename: f.filename,
-      emphasized: true,
-      extractedAt,
-      text: clampText(text, 60_000)
-    })
+  const uploads = input.payload.uploadFiles.slice(0, 10)
+  if (uploads.length > 0) msg(`解析上传文件：${uploads.length} 个…`)
+  for (const f of uploads) {
+    try {
+      const { kind, text } = await extractUploadText(f.filename, f.buffer)
+      if (!text.trim()) {
+        msg(`跳过（无文本）：${f.filename}`)
+        continue
+      }
+      const id = `S${nanoid(8)}`
+      sources.push({
+        id,
+        type: kind,
+        filename: f.filename,
+        emphasized: true,
+        extractedAt,
+        text: clampText(text, 60_000)
+      })
+    } catch (e) {
+      const msgText = e instanceof Error ? e.message : String(e)
+      msg(`解析失败（${f.filename}）：${msgText}`)
+    }
   }
 
   if (sources.length === 0) {

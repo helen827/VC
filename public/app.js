@@ -17,6 +17,39 @@ const copyBtnEl = $("#copyBtn");
 const formEl = $("#form");
 const resetBtn = $("#resetBtn");
 
+const uploadInputEl = $("#uploadFiles");
+const uploadFileListEl = $("#uploadFileList");
+const uploadHintEl = $("#uploadHint");
+const clearUploadBtn = $("#clearUploadBtn");
+const MAX_UPLOAD_FILES = 10;
+/** @type {File[]} */
+let uploadFileBucket = [];
+
+// Wizard (GEO onboarding)
+const stepperEl = $("#stepper");
+const wizardStepEl = $("#wizardStep");
+const wizardMetaEl = $("#wizardMeta");
+const prevStepBtn = $("#prevStepBtn");
+const nextStepBtn = $("#nextStepBtn");
+const wizardSummaryEl = $("#wizardSummary");
+const wizardSteps = Array.from(document.querySelectorAll(".wizardStep"));
+const TOTAL_STEPS = 5;
+
+const companyAliasesEl = $("#companyAliases");
+const companyOneLinerEl = $("#companyOneLiner");
+const desiredPerceptionEl = $("#desiredPerception");
+const audienceMarketEl = $("#audienceMarket");
+const audienceGovFundEl = $("#audienceGovFund");
+const competitorsEl = $("#competitors");
+const userQuestionsEl = $("#userQuestions");
+const mustBeTrueEl = $("#mustBeTrue");
+const claimsToAvoidEl = $("#claimsToAvoid");
+const industryEl = $("#industry");
+const productEl = $("#product");
+const productDefinitionEl = $("#productDefinition");
+const genQuestionsBtn = $("#genQuestionsBtn");
+const plainTextEvidenceEl = $("#plainTextEvidence");
+
 // Access gate (public deployment)
 const gateOverlayEl = $("#gateOverlay");
 const gatePasswordEl = $("#gatePassword");
@@ -450,8 +483,91 @@ function currentPastes() {
   return items.filter((x) => x.text && x.text.trim().length > 0);
 }
 
+function normLines(text) {
+  return String(text || "")
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function selectedQuestionAudiences() {
+  const out = []
+  if (audienceMarketEl?.checked) out.push("market_investor")
+  if (audienceGovFundEl?.checked) out.push("gov_guidance_fund")
+  return out
+}
+
+function buildGuidePaste() {
+  const aliases = normLines(String(companyAliasesEl?.value || "").replace(/，/g, ",").replace(/;/g, ",").split(",").join("\n"));
+  const oneLiner = String(companyOneLinerEl?.value || "").trim();
+  const desired = normLines(desiredPerceptionEl?.value || "");
+  const industry = String(industryEl?.value || "").trim();
+  const product = String(productEl?.value || "").trim();
+  const definition = String(productDefinitionEl?.value || "").trim();
+  const audiences = selectedQuestionAudiences();
+  const competitors = normLines(String(competitorsEl?.value || "").replace(/，/g, ",").replace(/;/g, ",").split(",").join("\n"));
+  const questions = normLines(userQuestionsEl?.value || "");
+  const mustBeTrue = normLines(mustBeTrueEl?.value || "");
+  const avoid = normLines(claimsToAvoidEl?.value || "");
+
+  // If user didn't fill anything, don't inject.
+  const hasAny =
+    aliases.length ||
+    oneLiner ||
+    desired.length ||
+    industry ||
+    product ||
+    definition ||
+    audiences.length ||
+    competitors.length ||
+    questions.length ||
+    mustBeTrue.length ||
+    avoid.length;
+  if (!hasAny) return null;
+
+  const md = [
+    `# 公司定位与期望认知（用户填写）`,
+    ``,
+    industry ? `## 行业\n${industry}` : ``,
+    product ? `## 产品/能力\n${product}` : ``,
+    definition ? `## 产品定义\n${definition}` : ``,
+    audiences.length
+      ? `## 问法面向受众\n${audiences
+          .map((a) => (a === "market_investor" ? "- 市场化投资人" : "- 政府引导基金"))
+          .join("\n")}`
+      : ``,
+    oneLiner ? `## 一句话定位\n${oneLiner}` : ``,
+    aliases.length ? `## 别名/常见写法\n- ${aliases.join("\n- ")}` : ``,
+    desired.length ? `## 希望大模型如何描述我们（必须出现）\n- ${desired.join("\n- ")}` : ``,
+    competitors.length ? `## 竞品/替代方案\n- ${competitors.join("\n- ")}` : ``,
+    questions.length ? `## 典型用户问法（覆盖问法族）\n${questions.map((q) => `- ${q}`).join("\n")}` : ``,
+    mustBeTrue.length ? `## 必须准确的事实（合规边界）\n- ${mustBeTrue.join("\n- ")}` : ``,
+    avoid.length ? `## 不能说/容易被误解的点（合规边界）\n- ${avoid.join("\n- ")}` : ``,
+    ``
+  ]
+    .filter(Boolean)
+    .join("\n\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  if (!md) return null;
+  return { title: "向导信息（优先证据块）", emphasized: true, sourceUrl: "", text: md };
+}
+
+function buildPlainTextEvidencePaste() {
+  const text = String(plainTextEvidenceEl?.value || "").trim();
+  if (!text) return null;
+  return { title: "纯文本资料片段", emphasized: true, sourceUrl: "", text };
+}
+
 function syncHiddenJson() {
-  pastedBlocksJsonEl.value = JSON.stringify(currentPastes());
+  const guide = buildGuidePaste();
+  const blocks = currentPastes();
+  const plain = buildPlainTextEvidencePaste();
+  if (plain) blocks.unshift(plain);
+  if (guide) blocks.unshift(guide);
+  pastedBlocksJsonEl.value = JSON.stringify(blocks);
 }
 
 function addPaste(initial = {}) {
@@ -499,11 +615,108 @@ function addPaste(initial = {}) {
   syncHiddenJson();
 }
 
-addPasteBtn.addEventListener("click", () => addPaste());
+function fmtBytes(n) {
+  if (n < 1024) return `${n} B`;
+  if (n < 1048576) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1048576).toFixed(1)} MB`;
+}
+
+function isDupUpload(f) {
+  return uploadFileBucket.some(
+    (x) => x.name === f.name && x.size === f.size && x.lastModified === f.lastModified
+  );
+}
+
+function setUploadHint(text) {
+  if (uploadHintEl) uploadHintEl.textContent = text || "";
+}
+
+function renderUploadFileList() {
+  if (!uploadFileListEl) return;
+  uploadFileListEl.innerHTML = "";
+  if (uploadFileBucket.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "sub";
+    empty.style.margin = "0";
+    empty.textContent = `尚未选择文件。可多选；需要再加时再次点「选择文件」即可累加（最多 ${MAX_UPLOAD_FILES} 个）。`;
+    uploadFileListEl.appendChild(empty);
+    return;
+  }
+  for (const file of uploadFileBucket) {
+    const row = document.createElement("div");
+    row.className = "uploadChip";
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "uploadChipName";
+    nameSpan.title = file.name;
+    nameSpan.textContent = file.name;
+    const metaSpan = document.createElement("span");
+    metaSpan.className = "uploadChipMeta";
+    metaSpan.textContent = fmtBytes(file.size);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn btnDanger btnTiny";
+    btn.textContent = "移除";
+    btn.addEventListener("click", () => {
+      const i = uploadFileBucket.indexOf(file);
+      if (i >= 0) uploadFileBucket.splice(i, 1);
+      renderUploadFileList();
+      setUploadHint("");
+    });
+    row.appendChild(nameSpan);
+    row.appendChild(metaSpan);
+    row.appendChild(btn);
+    uploadFileListEl.appendChild(row);
+  }
+}
+
+function mergePickedUploadFiles(files) {
+  let added = 0;
+  let skippedDup = 0;
+  let skippedCap = 0;
+  for (const f of files) {
+    if (uploadFileBucket.length >= MAX_UPLOAD_FILES) {
+      skippedCap += 1;
+      continue;
+    }
+    if (isDupUpload(f)) {
+      skippedDup += 1;
+      continue;
+    }
+    uploadFileBucket.push(f);
+    added += 1;
+  }
+  const parts = [];
+  if (added) parts.push(`已添加 ${added} 个文件`);
+  if (skippedDup) parts.push(`跳过 ${skippedDup} 个重复`);
+  if (skippedCap) parts.push(`已达 ${MAX_UPLOAD_FILES} 个上限，另有 ${skippedCap} 个未加入`);
+  setUploadHint(parts.join("；"));
+}
+
+if (uploadInputEl) {
+  uploadInputEl.addEventListener("change", () => {
+    const picked = Array.from(uploadInputEl.files || []);
+    mergePickedUploadFiles(picked);
+    uploadInputEl.value = "";
+    renderUploadFileList();
+  });
+}
+clearUploadBtn?.addEventListener("click", () => {
+  uploadFileBucket = [];
+  renderUploadFileList();
+  setUploadHint("");
+});
+
+renderUploadFileList();
+
+addPasteBtn?.addEventListener?.("click", () => addPaste());
 resetBtn.addEventListener("click", () => {
   formEl.reset();
   pastesEl.innerHTML = "";
   addPaste();
+  if (plainTextEvidenceEl) plainTextEvidenceEl.value = "";
+  uploadFileBucket = [];
+  renderUploadFileList();
+  setUploadHint("");
   setStatus("");
   setDownload("");
   setSopVisible(false);
@@ -516,6 +729,188 @@ addPaste({
   emphasized: true,
   text: ""
 });
+
+function setStepActive(step) {
+  const s = Math.max(1, Math.min(TOTAL_STEPS, Number(step) || 1));
+  if (wizardStepEl) wizardStepEl.value = String(s);
+
+  for (const el of wizardSteps) {
+    const n = Number(el.getAttribute("data-step") || "0");
+    el.classList.toggle("wizardStepActive", n === s);
+  }
+
+  if (wizardMetaEl) wizardMetaEl.textContent = `步骤 ${s} / ${TOTAL_STEPS}`;
+  if (prevStepBtn) prevStepBtn.disabled = s <= 1;
+  if (nextStepBtn) nextStepBtn.style.display = s >= TOTAL_STEPS ? "none" : "inline-block";
+
+  const pills = Array.from(document.querySelectorAll("[data-step-pill]"));
+  for (const p of pills) {
+    const n = Number(p.getAttribute("data-step-pill") || "0");
+    p.classList.toggle("stepPillActive", n === s);
+  }
+
+  // live summary
+  if (wizardSummaryEl) {
+    const company = String($("#companyName")?.value || "").trim();
+    const oneLiner = String(companyOneLinerEl?.value || "").trim();
+    const desiredAll = normLines(desiredPerceptionEl?.value || "");
+    const qsAll = normLines(userQuestionsEl?.value || "");
+    const desired = desiredAll.slice(0, 6);
+    const qs = qsAll.slice(0, 6);
+    const chips = [];
+    if (company) chips.push(`公司：${company}`);
+    if (oneLiner) chips.push(`定位：${oneLiner}`);
+    if (desiredAll.length) chips.push(`期望认知：${desiredAll.length} 条`);
+    if (qsAll.length) chips.push(`用户问法：${qsAll.length} 条`);
+    wizardSummaryEl.innerHTML = `<strong>即将生成：</strong>系统会把你前面填写的问法/定位/期望认知/边界自动作为“重点强调材料”加入生成。${
+      chips.length ? `<br /><br /><span style="color: var(--muted)">${chips.join(" · ")}</span>` : ""
+    }`;
+  }
+
+  // keep hidden json up to date (guide injection depends on wizard fields)
+  syncHiddenJson();
+}
+
+function step1Validate() {
+  const missing = [];
+  const company = String($("#companyName")?.value || "").trim();
+  if (!company) missing.push("公司名");
+  return { ok: missing.length === 0, missing };
+}
+
+function validateStep(step) {
+  const s = Number(step) || 1;
+  if (s === 1) return step1Validate();
+  if (s === 2) {
+    const company = String($("#companyName")?.value || "").trim();
+    const oneLiner = String(companyOneLinerEl?.value || "").trim();
+    const desired = normLines(desiredPerceptionEl?.value || "");
+    const missing = [];
+    if (!company) missing.push("公司名");
+    if (!oneLiner) missing.push("一句话定位");
+    if (desired.length < 3) missing.push("期望认知（至少 3 条）");
+    return { ok: missing.length === 0, missing };
+  }
+  return { ok: true, missing: [] };
+}
+
+function goNext() {
+  const cur = Number(wizardStepEl?.value || "1") || 1;
+  const check = validateStep(cur);
+  if (!check.ok) {
+    setStatus(`请先补全：${check.missing.join("、")}`);
+    return;
+  }
+  setStatus("");
+  setStepActive(cur + 1);
+}
+
+function goPrev() {
+  const cur = Number(wizardStepEl?.value || "1") || 1;
+  setStatus("");
+  setStepActive(cur - 1);
+}
+
+prevStepBtn?.addEventListener("click", goPrev);
+nextStepBtn?.addEventListener("click", goNext);
+stepperEl?.addEventListener("click", (e) => {
+  const el = e.target?.closest?.("[data-step-pill]");
+  if (!el) return;
+  const n = Number(el.getAttribute("data-step-pill") || "1");
+  // allow jumping back freely; jumping forward requires current step validation
+  const cur = Number(wizardStepEl?.value || "1") || 1;
+  if (n > cur) {
+    const check = validateStep(cur);
+    if (!check.ok) {
+      setStatus(`请先补全：${check.missing.join("、")}`);
+      return;
+    }
+  }
+  setStatus("");
+  setStepActive(n);
+});
+
+// keep guide paste updated when typing
+for (const el of [
+  $("#companyName"),
+  industryEl,
+  productEl,
+  productDefinitionEl,
+  companyAliasesEl,
+  companyOneLinerEl,
+  desiredPerceptionEl,
+  audienceMarketEl,
+  audienceGovFundEl,
+  competitorsEl,
+  userQuestionsEl,
+  plainTextEvidenceEl,
+  mustBeTrueEl,
+  claimsToAvoidEl
+]) {
+  el?.addEventListener?.("input", () => syncHiddenJson());
+  el?.addEventListener?.("change", () => syncHiddenJson());
+}
+
+setStepActive(1);
+
+async function generateQuestions() {
+  if (!genQuestionsBtn) return;
+  const questionAudiences = selectedQuestionAudiences();
+  if (!questionAudiences.length) {
+    setStatus("请至少勾选一类受众：市场化投资人 或 政府引导基金。");
+    return;
+  }
+  genQuestionsBtn.disabled = true;
+  const oldText = genQuestionsBtn.textContent;
+  genQuestionsBtn.textContent = "生成中…";
+  try {
+    const payload = {
+      companyName: String($("#companyName")?.value || "").trim(),
+      industry: String(industryEl?.value || "").trim(),
+      product: String(productEl?.value || "").trim(),
+      definition: String(productDefinitionEl?.value || "").trim(),
+      competitors: String(competitorsEl?.value || "").trim(),
+      questionAudiences
+    };
+    const res = await authFetch("/api/suggest_questions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error(t || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const qs = Array.isArray(data.questions) ? data.questions : [];
+    const text = qs.join("\n");
+    if (userQuestionsEl) userQuestionsEl.value = text;
+    syncHiddenJson();
+    const score = typeof data.score === "number" ? data.score : null;
+    const qualityOk = data.qualityOk === true;
+    const att = typeof data.attempts === "number" ? data.attempts : null;
+    const hintLine =
+      Array.isArray(data.hints) && data.hints.length
+        ? ` 建议：${data.hints.slice(0, 2).join("；")}`
+        : "";
+    if (qs.length) {
+      const tier = qualityOk ? "达标" : "未达 80";
+      const scorePart = score != null ? `质量分 ${score}（${tier}）` : "已生成";
+      const attPart = att != null ? ` · 共尝试 ${att} 轮` : "";
+      setStatus(`已生成问法：${qs.length} 条（可继续编辑）· ${scorePart}${attPart}.${qualityOk ? "" : hintLine}`);
+    } else {
+      setStatus("生成完成，但没有返回问题");
+    }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    setStatus(`生成问法失败：${msg}`);
+  } finally {
+    genQuestionsBtn.disabled = false;
+    genQuestionsBtn.textContent = oldText || "一键生成问法";
+  }
+}
+
+genQuestionsBtn?.addEventListener?.("click", () => void generateQuestions());
 
 async function pollJob(jobId) {
   const t0 = Date.now();
@@ -565,6 +960,12 @@ async function pollJob(jobId) {
 
 formEl.addEventListener("submit", async (evt) => {
   evt.preventDefault();
+  const check = validateStep(2);
+  if (!check.ok) {
+    setStatus(`请先补全：${check.missing.join("、")}`);
+    setStepActive(2);
+    return;
+  }
   setDownload("");
   setSopVisible(false);
   filesHintEl.textContent = "";
@@ -572,6 +973,9 @@ formEl.addEventListener("submit", async (evt) => {
   syncHiddenJson();
 
   const fd = new FormData(formEl);
+  for (const f of uploadFileBucket) {
+    fd.append("uploadFiles", f);
+  }
   setStatus("提交任务中…");
 
   const res = await authFetch("/api/jobs", { method: "POST", body: fd });
@@ -588,7 +992,23 @@ formEl.addEventListener("submit", async (evt) => {
   await pollJob(data.jobId);
 });
 
-// Show gate proactively (public deployment); if no password is configured server-side,
-// the first request will still succeed and the overlay will not block usage.
-showGate("");
+// Access gate boot:
+// - If token exists, validate silently and skip the gate.
+// - Otherwise show the gate.
+void (async () => {
+  const token = getAccessToken();
+  if (!token) {
+    showGate("");
+    return;
+  }
+  try {
+    const res = await authFetch("/healthz");
+    if (res.ok) {
+      hideGate();
+      return;
+    }
+  } catch {}
+  setAccessToken("");
+  showGate("密码不正确或已过期，请重新输入。");
+})();
 

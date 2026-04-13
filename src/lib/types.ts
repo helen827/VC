@@ -1,4 +1,4 @@
-export type SourceType = 'url' | 'paste' | 'docx'
+export type SourceType = 'url' | 'paste' | 'docx' | 'pdf' | 'pptx' | 'pages'
 
 export type Source = {
   id: string

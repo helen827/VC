@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GEO Agent Web</title>
+    <title>创业公司融资 GEO 助手（火山石投资被投企业专用）</title>
     <style>
       :root {
         color-scheme: light dark;
@@ -60,11 +60,14 @@
         font-size: 13px;
         padding: 6px 10px;
         border-radius: 10px;
-        border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
       }
       .topLinks a:hover {
         text-decoration: underline;
+        background: rgba(255, 255, 255, 0.08);
       }
       h1 {
         font-size: 20px;
@@ -96,9 +99,28 @@
         padding: 10px 10px;
         border-radius: 10px;
         border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.04);
+        background: rgba(255, 255, 255, 0.06);
         color: var(--text);
         outline: none;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: none;
+      }
+      input[type="text"]:focus,
+      textarea:focus {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.22);
+        box-shadow: none;
+      }
+      /* Company name input: don't span full width on desktop */
+      input#companyName[type="text"] {
+        width: calc((100% - 12px) / 2);
+        max-width: 100%;
+      }
+      @media (max-width: 860px) {
+        input#companyName[type="text"] {
+          width: 100%;
+        }
       }
       textarea {
         min-height: 110px;
@@ -123,20 +145,118 @@
       }
       .btn {
         appearance: none;
-        border: 1px solid var(--border);
+        border: 0;
         background: rgba(255, 255, 255, 0.06);
         color: var(--text);
         padding: 9px 12px;
         border-radius: 10px;
         cursor: pointer;
         font-size: 13px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: none;
+        outline: none;
+      }
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: none;
+      }
+      .btn:active {
+        transform: translateY(0.5px);
+      }
+      .btn:focus-visible {
+        outline: none;
+        box-shadow: none;
+        background: rgba(255, 255, 255, 0.10);
+      }
+      .btn:disabled {
+        opacity: 1;
+        cursor: not-allowed;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.08);
+        transform: none;
+        box-shadow: none;
+      }
+      .btn:disabled:hover {
+        background: rgba(255, 255, 255, 0.08);
       }
       .btnPrimary {
-        border-color: rgba(122, 162, 255, 0.5);
-        background: rgba(122, 162, 255, 0.16);
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.12),
+            rgba(255, 255, 255, 0.06)
+          ),
+          rgba(122, 162, 255, 0.10);
+        box-shadow: none;
+      }
+      .btnPrimary:hover {
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.16),
+            rgba(255, 255, 255, 0.08)
+          ),
+          rgba(122, 162, 255, 0.12);
+      }
+      .btnPrimary:disabled,
+      .btnPrimary:disabled:hover {
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.14),
+            rgba(255, 255, 255, 0.08)
+          ),
+          rgba(122, 162, 255, 0.06);
+      }
+
+      @media (prefers-color-scheme: light) {
+        .btn:disabled {
+          background: rgba(10, 20, 40, 0.05);
+          box-shadow: inset 0 0 0 1px rgba(10, 20, 40, 0.03);
+        }
+        .btn:disabled:hover {
+          background: rgba(10, 20, 40, 0.05);
+        }
+        .btn {
+          background: rgba(10, 20, 40, 0.04);
+          color: rgba(11, 18, 32, 0.92);
+          box-shadow: none;
+        }
+        .btn:hover {
+          background: rgba(10, 20, 40, 0.06);
+          box-shadow: none;
+        }
+        .btnPrimary {
+          background: linear-gradient(
+              180deg,
+              rgba(10, 20, 40, 0.04),
+              rgba(10, 20, 40, 0.02)
+            ),
+            rgba(36, 87, 255, 0.08);
+          box-shadow: none;
+        }
+        .btnPrimary:hover {
+          background: linear-gradient(
+              180deg,
+              rgba(10, 20, 40, 0.06),
+              rgba(10, 20, 40, 0.03)
+            ),
+            rgba(36, 87, 255, 0.10);
+        }
+
+        input[type="text"],
+        textarea {
+          background: rgba(10, 20, 40, 0.04);
+          color: rgba(11, 18, 32, 0.92);
+          border: 1px solid rgba(10, 20, 40, 0.12);
+          box-shadow: none;
+        }
+        input[type="text"]:focus,
+        textarea:focus {
+          background: rgba(10, 20, 40, 0.06);
+          border-color: rgba(10, 20, 40, 0.18);
+          box-shadow: none;
+        }
       }
       .btnDanger {
-        border-color: rgba(255, 122, 144, 0.5);
         background: rgba(255, 122, 144, 0.14);
         color: var(--text);
       }
@@ -146,6 +266,269 @@
         padding: 12px;
         margin-top: 10px;
         background: rgba(255, 255, 255, 0.03);
+      }
+      .uploadToolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin-top: 8px;
+      }
+      .uploadFileNative {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      .uploadFileList {
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .uploadChip {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 13px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .uploadChipName {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
+        flex: 1;
+      }
+      .uploadChipMeta {
+        color: var(--muted);
+        font-size: 12px;
+        flex-shrink: 0;
+      }
+      .btnTiny {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+      .uploadHint {
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      /* Wizard (GEO onboarding) */
+      .stepper {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 8px 0 14px;
+      }
+      .stepPill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        font-size: 12px;
+        user-select: none;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .stepPillActive {
+        color: var(--text);
+        border-color: rgba(255, 255, 255, 0.18);
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.12),
+            rgba(255, 255, 255, 0.06)
+          ),
+          rgba(122, 162, 255, 0.12);
+      }
+      .stepDot {
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        color: var(--muted);
+        font-size: 11px;
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .stepPillActive .stepDot {
+        border-color: rgba(255, 255, 255, 0.22);
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.10);
+      }
+      .wizardStep {
+        display: none;
+      }
+      .wizardStepActive {
+        display: block;
+      }
+      .wizardNav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.10);
+      }
+      .wizardMeta {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      /* 受众选择：胶囊宽度随文案；选中仅靠背景高亮，checkbox 对视觉隐藏 */
+      .audienceDir {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .audienceDir > .sub {
+        margin-top: 0;
+        margin-bottom: 2px;
+      }
+      .audiencePillRow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+      label.audiencePill {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        box-sizing: border-box;
+        width: fit-content;
+        max-width: 100%;
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        font-size: 13px;
+        cursor: pointer;
+        user-select: none;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        margin: 0;
+      }
+      label.audiencePill:hover {
+        border-color: rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+      }
+      label.audiencePill:has(input:checked) {
+        color: var(--text);
+        border-color: rgba(255, 255, 255, 0.18);
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.12),
+            rgba(255, 255, 255, 0.06)
+          ),
+          rgba(122, 162, 255, 0.12);
+      }
+      label.audiencePill:has(input:focus-visible) {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+      label.audiencePill .audienceCheckboxHidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+        opacity: 0;
+        pointer-events: none;
+      }
+      @media (prefers-color-scheme: light) {
+        label.audiencePill {
+          border-color: rgba(10, 20, 40, 0.12);
+          background: rgba(10, 20, 40, 0.04);
+          color: var(--muted);
+        }
+        label.audiencePill:hover {
+          border-color: rgba(10, 20, 40, 0.16);
+          background: rgba(10, 20, 40, 0.06);
+        }
+        label.audiencePill:has(input:checked) {
+          border-color: rgba(10, 20, 40, 0.14);
+          background: linear-gradient(
+              180deg,
+              rgba(10, 20, 40, 0.06),
+              rgba(10, 20, 40, 0.02)
+            ),
+            rgba(36, 87, 255, 0.1);
+        }
+      }
+      .helper {
+        margin-top: 8px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .helper strong {
+        color: var(--text);
+      }
+      .fieldGrid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 860px) {
+        .fieldGrid2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      .sectionBlock {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+      }
+      .sectionBlock:first-child {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+      }
+      .sectionTitle {
+        margin: 0;
+        font-size: 13px;
+        color: var(--text);
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+      .sectionDesc {
+        margin-top: 6px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.5;
       }
       .inline {
         display: flex;
@@ -221,9 +604,11 @@
         }
       }
       .sidebar {
-        border: 1px solid var(--border);
+        border: 1px solid rgba(255, 255, 255, 0.14);
         border-radius: 14px;
-        background: rgba(255, 255, 255, 0.03);
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         padding: 10px;
         position: sticky;
         top: 14px;
@@ -268,29 +653,40 @@
         display: block;
         width: 100%;
         text-align: left;
-        border: 1px solid transparent;
-        background: transparent;
+        border: 0;
+        background: rgba(255, 255, 255, 0.02);
         color: var(--text);
         padding: 8px 8px;
         border-radius: 10px;
         cursor: pointer;
         font-size: 13px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: none;
       }
       .navItem:hover {
-        background: rgba(255, 255, 255, 0.04);
+        background: rgba(255, 255, 255, 0.06);
+        box-shadow: none;
       }
       .navItemActive {
-        border-color: rgba(122, 162, 255, 0.45);
-        background: rgba(122, 162, 255, 0.12);
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.12),
+            rgba(255, 255, 255, 0.06)
+          ),
+          rgba(122, 162, 255, 0.10);
+        box-shadow: none;
       }
       .navItemSub {
         padding-left: 18px;
         color: var(--muted);
       }
       .contentPane {
-        border: 1px solid var(--border);
+        border: 1px solid rgba(255, 255, 255, 0.14);
         border-radius: 14px;
-        background: rgba(255, 255, 255, 0.03);
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         padding: 16px;
         min-height: 180px;
       }
@@ -485,9 +881,9 @@
     <div class="wrap">
       <header>
         <div>
-          <h1>GEO Agent Web（本地生成 + 导出包）</h1>
+          <h1>创业公司融资 GEO 助手</h1>
           <div class="sub">
-            面向豆包/千问/DeepSeek 等平台的“被提及/可引用性”优化：输入公司名与资料 → 生成内容包
+            让投资人在AI中“搜得到、看得懂”。（火山石投资成员企业专属工具）
           </div>
         </div>
         <div class="topLinks">
@@ -497,37 +893,169 @@
 
       <div class="card">
         <form id="form">
-          <label for="companyName">公司名（必填）</label>
-          <input id="companyName" name="companyName" type="text" placeholder="例如：MeetingPilot" required />
+          <div class="stepper" id="stepper" aria-label="向导步骤">
+            <div class="stepPill" data-step-pill="1"><span class="stepDot">1</span><span>先定问法</span></div>
+            <div class="stepPill" data-step-pill="2"><span class="stepDot">2</span><span>公司是谁</span></div>
+            <div class="stepPill" data-step-pill="3"><span class="stepDot">3</span><span>给证据</span></div>
+            <div class="stepPill" data-step-pill="4"><span class="stepDot">4</span><span>边界与合规</span></div>
+            <div class="stepPill" data-step-pill="5"><span class="stepDot">5</span><span>生成</span></div>
+          </div>
 
-          <div class="row">
-            <div>
-              <label for="urls">入口 URL（可选，多行；官网/公众号文章/知乎文章等）</label>
-              <textarea
-                id="urls"
-                name="urls"
-                placeholder="每行一个 URL，例如：https://example.com/about"
-              ></textarea>
-            </div>
-            <div>
-              <label for="docxFiles">上传 Word（.docx，可选，可多选）</label>
-              <input id="docxFiles" name="docxFiles" type="file" accept=".docx" multiple />
-              <div class="sub" style="margin-top: 8px">
-                仅提取文本用于生成与溯源，不会执行宏；若资料敏感建议只粘贴可公开部分。
+          <input type="hidden" id="wizardStep" name="wizardStep" value="1" />
+
+          <section class="wizardStep" data-step="1">
+            <label for="companyName">公司名</label>
+            <input id="companyName" name="companyName" type="text" placeholder="" required />
+
+            <div class="fieldGrid2">
+              <div>
+                <label for="industry">行业</label>
+                <input id="industry" type="text" placeholder="" />
+              </div>
+              <div>
+                <label for="product">产品/能力</label>
+                <input id="product" type="text" placeholder="" />
               </div>
             </div>
-          </div>
 
-          <div class="pastesHeader">
-            <label style="margin: 0">手动补充材料（可选）</label>
-            <button type="button" class="btn" id="addPasteBtn">+ 添加一段</button>
-          </div>
-          <div id="pastes"></div>
-          <input type="hidden" id="pastedBlocksJson" name="pastedBlocksJson" value="[]" />
+            <label for="productDefinition">产品定位</label>
+            <input id="productDefinition" type="text" placeholder="" />
 
-          <div style="margin-top: 14px" class="inline">
-            <button type="submit" class="btn btnPrimary">生成发布 SOP（可选下载 zip）</button>
-            <button type="button" class="btn" id="resetBtn">重置</button>
+            <div class="audienceDir" role="group" aria-label="面向谁（可多选）">
+              <div class="sub">面向谁（可多选）</div>
+              <div class="audiencePillRow">
+                <label class="audiencePill">
+                  <input class="audienceCheckboxHidden" type="checkbox" id="audienceMarket" checked />
+                  <span>市场化投资人</span>
+                </label>
+                <label class="audiencePill">
+                  <input class="audienceCheckboxHidden" type="checkbox" id="audienceGovFund" checked />
+                  <span>政府引导基金</span>
+                </label>
+              </div>
+              <div class="sub" style="margin-top: 2px">
+                会按所选受众生成常搜问题；至少勾选一类。
+              </div>
+            </div>
+
+            <div class="fieldGrid2">
+              <div>
+                <label for="competitors">竞品/替代方案</label>
+                <input id="competitors" type="text" placeholder="竞品/替代方案（逗号分隔）" />
+              </div>
+            </div>
+
+            <div class="inline" style="justify-content: space-between; margin-top: 10px">
+              <label style="margin: 0" for="userQuestions">用户会怎么问</label>
+              <button type="button" class="btn btnPrimary" id="genQuestionsBtn">一键生成</button>
+            </div>
+            <textarea id="userQuestions" placeholder=""></textarea>
+
+            <div class="helper">
+              <strong>提示：</strong>建议先点“一键生成”，再手动删改增补，让问题更贴近你们的真实场景。
+            </div>
+          </section>
+
+          <section class="wizardStep" data-step="2">
+            <div class="fieldGrid2">
+              <div>
+                <label for="companyAliases">别名/英文名/常见写法</label>
+                <input id="companyAliases" type="text" placeholder="别名/英文名/常见写法（逗号分隔）" />
+              </div>
+              <div>
+                <label for="companyOneLiner">一句话定位</label>
+                <input id="companyOneLiner" type="text" placeholder="我们帮谁，在什么场景，用什么方式，得到什么结果" />
+              </div>
+            </div>
+
+            <label for="desiredPerception">希望大模型如何描述你们（3-5 条）</label>
+            <textarea id="desiredPerception" placeholder=""></textarea>
+
+            <div class="helper">
+              <strong>为什么要填这些？</strong>
+              GEO 的目标不是堆关键词，而是让大模型在回答“推荐/对比/怎么做”时能稳定出现你们的名字与正确表述。
+              这几项会作为“优先证据块”参与生成。
+            </div>
+          </section>
+
+          <section class="wizardStep" data-step="3">
+            <div class="sectionBlock">
+              <h3 class="sectionTitle">现有的报道 / 公开资料（URL）</h3>
+              <div class="sectionDesc">
+                把官网/公众号/知乎/媒体稿等链接贴进来，系统会抓取正文作为“可引用证据”。
+              </div>
+              <label for="urls">入口 URL（多行）</label>
+              <textarea id="urls" name="urls" placeholder="每行一个 URL"></textarea>
+            </div>
+
+            <div class="sectionBlock">
+              <h3 class="sectionTitle">文件上传（已有资料文档）</h3>
+              <div class="sectionDesc">
+                上传你已有的对外/内部资料（只抽取文本用于生成与溯源）。
+              </div>
+              <label for="uploadFiles">上传资料（可多选）</label>
+              <input
+                id="uploadFiles"
+                type="file"
+                class="uploadFileNative"
+                accept=".docx,.pdf,.pptx,.pages,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                multiple
+              />
+              <div class="uploadToolbar">
+                <label for="uploadFiles" class="btn btnPrimary" style="cursor: pointer; margin: 0">选择文件（可多选）</label>
+                <button type="button" class="btn" id="clearUploadBtn">清空已选</button>
+              </div>
+              <div class="uploadFileList" id="uploadFileList"></div>
+              <div class="uploadHint" id="uploadHint"></div>
+              <div class="sub" style="margin-top: 8px">
+                支持 Word（.docx）、PDF、PowerPoint（.pptx）、Pages（.pages，需包内含预览 PDF；否则请导出为 PDF/Word 再传）。
+                可多选；需要再加文件时再次点「选择文件」即可累加（最多 10 个）。若资料敏感建议只上传可公开部分。
+              </div>
+            </div>
+
+            <div class="sectionBlock">
+              <h3 class="sectionTitle">纯文本（粘贴现有资料片段）</h3>
+              <div class="sectionDesc">
+                把你现成的介绍/卖点/FAQ/合规边界等片段直接粘贴进来（这是“证据输入”，不是再写一遍定位）。
+              </div>
+              <label for="plainTextEvidence">内容（可选）</label>
+              <textarea id="plainTextEvidence" placeholder=""></textarea>
+              <div id="pastes" style="display: none"></div>
+              <input type="hidden" id="pastedBlocksJson" name="pastedBlocksJson" value="[]" />
+            </div>
+          </section>
+
+          <section class="wizardStep" data-step="4">
+            <label for="mustBeTrue">必须准确的事实（推荐）</label>
+            <textarea
+              id="mustBeTrue"
+              placeholder=""
+            ></textarea>
+
+            <label for="claimsToAvoid">不能说/容易被误解的点（推荐）</label>
+            <textarea id="claimsToAvoid" placeholder=""></textarea>
+
+            <div class="helper">
+              <strong>为什么要填边界？</strong>
+              大模型会“补全”信息；把边界写清楚能显著减少幻觉与合规风险。
+            </div>
+          </section>
+
+          <section class="wizardStep" data-step="5">
+            <div class="helper" id="wizardSummary">
+              <strong>即将生成：</strong>系统会把你前面填写的问法/定位/期望认知/边界，自动作为“重点强调材料”加入生成。
+            </div>
+
+            <div style="margin-top: 14px" class="inline">
+              <button type="submit" class="btn btnPrimary">生成发布 SOP（可选下载 zip）</button>
+              <button type="button" class="btn" id="resetBtn">重置</button>
+            </div>
+          </section>
+
+          <div class="wizardNav">
+            <button type="button" class="btn" id="prevStepBtn">上一步</button>
+            <div class="wizardMeta" id="wizardMeta">步骤 1 / 5</div>
+            <button type="button" class="btn btnPrimary" id="nextStepBtn">下一步</button>
           </div>
         </form>
 
@@ -564,7 +1092,7 @@
       </div>
 
       <footer>
-        说明：生成后会优先展示“发布 SOP”（告诉你在官网/公众号/知乎分别发什么与发布顺序）；zip 仅用于备份与批量复制素材。当前版本默认使用 OpenAI 兼容的 Chat Completions 接口（配置见 <code>.env</code>）。评测包会生成一组问题，你可以把豆包/千问/DeepSeek 的回答粘贴回模板做人工抽检对比。
+        说明：本工具仅供火山石投资被投企业使用。生成后会优先展示“发布 SOP”（按顺序告诉你发什么、怎么发）；zip 仅用于备份与批量复制素材。评测会生成一组“投资人会怎么问”的问题，你可以把平台回答粘贴回笔记做人工抽检对比。
       </footer>
     </div>
 
